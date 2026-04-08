@@ -103,6 +103,22 @@ const handleSearch = async () => {
             style={{background:'#1a1a1a', color:'white', border:'none', borderRadius:'8px', padding:'10px 24px', fontSize:'14px', cursor:'pointer', fontWeight:'500'}}>
             検索
           </button>
+          {stores.length > 0 && (
+  <button onClick={() => {
+    const headers = ['会社名','担当者','コール時間設定','ステータス','電話番号','業界','職種','都道府県','市区町村','ウェブサイトURL','google評価','口コミ数','取得日']
+    const rows = stores.map(s => headers.map(h => `"${(s[h] || '').toString().replace(/"/g, '""')}"`).join(','))
+    const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n')
+    const blob = new Blob([csv], {type: 'text/csv'})
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `営業リスト_${area}_${new Date().toISOString().slice(0,10)}.csv`
+    a.click()
+  }}
+  style={{background:'#22c55e', color:'white', border:'none', borderRadius:'8px', padding:'10px 24px', fontSize:'14px', cursor:'pointer', fontWeight:'500'}}>
+    CSVダウンロード
+  </button>
+)}
         </div>
 
         {/* 件数表示 */}
