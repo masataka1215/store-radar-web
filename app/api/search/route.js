@@ -129,10 +129,17 @@ export async function GET(request) {
 
   const res = await fetch(searchUrl)
   const data = await res.json()
+// Supabaseから取得済みのplace_idを取得
+const { data: existingData } = await supabase
+  .from('stores')
+  .select('place_id')
 
-  const results = (data.results || [])
+const existingIds = new Set((existingData || []).map(r => r.place_id))
+
+const results = (data.results || [])
     .filter(p => !isChain(p.name))
     .filter(p => (p.user_ratings_total ?? 999) <= 50)
+    .filter(p => !existingIds.has(p.place_id))  // ← これを追加
     .slice(0, 20)
     .map(p => ({
       会社名: p.name,
