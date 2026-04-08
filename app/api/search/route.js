@@ -135,9 +135,11 @@ const filtered = (data.results || [])
     .filter(p => (p.user_ratings_total ?? 999) <= 50)
     .slice(0, 20)
 
-  const results = await Promise.all(filtered.map(async (p) => {
+console.log(`フィルター後: ${filtered.length}件にDetails APIを叩きます`)
+
+const results = await Promise.all(filtered.map(async (p) => {
     const details = await getDetails(p.place_id)
-    const { pref, city } = parseAddress(details.address)
+    
     return {
       会社名: p.name,
       担当者: '梁川 允孝',
