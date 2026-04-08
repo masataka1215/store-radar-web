@@ -18,8 +18,6 @@ const AREAS = [
   '大津市','草津市',
 ]
 
-const STAFF = ['梁川 允孝', '長野 敏也', '有馬 時也', '井口 凌太']
-
 const GENRES = [
   'すべて',
   '和食','日本料理','寿司','海鮮・魚介','そば（蕎麦）','うなぎ','焼き鳥',
@@ -29,19 +27,20 @@ const GENRES = [
   '料理旅館','ビストロ','ハンバーグ','とんかつ','串揚げ','うどん',
   'しゃぶしゃぶ','沖縄料理','ハンバーガー','パスタ','ピザ','餃子','ホルモン',
   'カフェ','喫茶店','ケーキ','タピオカ','食堂','ビュッフェ・バイキング',
-
-  
 ]
 
+const STAFF = ['梁川 允孝', '長野 敏也', '有馬 時也', '井口 凌太']
 
+const STATUSES = ['新規', '商談中', '成約', '失注', '対象外']
 
 export default function Home() {
   const [stores, setStores] = useState<any[]>([])
   const [area, setArea] = useState('すべて')
   const [genre, setGenre] = useState('すべて')
+  const [staff, setStaff] = useState('梁川 允孝')
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
-const [staff, setStaff] = useState('梁川 允孝')
+
   const handleSearch = async () => {
     if (area === 'すべて' || area.startsWith('---')) {
       alert('エリアを選択してください')
@@ -57,85 +56,112 @@ const [staff, setStaff] = useState('梁川 允孝')
   }
 
   return (
-    <main className="p-4 max-w-full mx-auto">
-      <h1 className="text-2xl font-medium mb-6">関西飲食店 営業リスト</h1>
+    <div style={{minHeight:'100vh', background:'#f9f7f4', padding:'2rem'}}>
+      <div style={{maxWidth:'1200px', margin:'0 auto'}}>
 
-      <div className="flex gap-3 mb-6 flex-wrap">
-        <select className="border rounded px-3 py-2 text-sm" value={area} onChange={e => {
-          if (e.target.value.startsWith('---')) return
-          setArea(e.target.value)
-        }}>
-          {AREAS.map(a => (
-            a.startsWith('---')
-              ? <option key={a} disabled style={{fontWeight:'bold', color:'#888'}}>{a}</option>
-              : <option key={a}>{a}</option>
-          ))}
-        </select>
+        {/* タイトル */}
+        <h1 style={{fontSize:'24px', fontWeight:'600', marginBottom:'1.5rem', color:'#1a1a1a'}}>
+          関西飲食店 営業リスト
+        </h1>
 
-        <select className="border rounded px-3 py-2 text-sm" value={genre} onChange={e => setGenre(e.target.value)}>
-          {GENRES.map(g => <option key={g}>{g}</option>)}
-        </select>
-        <select className="border rounded px-3 py-2 text-sm" value={staff} onChange={e => setStaff(e.target.value)}>
-          {STAFF.map(s => <option key={s}>{s}</option>)}
-        </select>
-        <button onClick={handleSearch} className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
-          検索
-        </button>
-      </div>
+        {/* フィルター */}
+        <div style={{display:'flex', gap:'1rem', marginBottom:'1.5rem', flexWrap:'wrap', alignItems:'flex-end'}}>
+          <div>
+            <div style={{fontSize:'12px', color:'#888', marginBottom:'4px'}}>エリア</div>
+            <select style={{border:'1px solid #ddd', borderRadius:'8px', padding:'10px 14px', fontSize:'14px', background:'white', minWidth:'160px'}}
+              value={area} onChange={e => { if (e.target.value.startsWith('---')) return; setArea(e.target.value) }}>
+              {AREAS.map(a => (
+                a.startsWith('---')
+                  ? <option key={a} disabled style={{fontWeight:'bold', color:'#aaa'}}>{a}</option>
+                  : <option key={a}>{a}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <div style={{fontSize:'12px', color:'#888', marginBottom:'4px'}}>職種</div>
+            <select style={{border:'1px solid #ddd', borderRadius:'8px', padding:'10px 14px', fontSize:'14px', background:'white', minWidth:'160px'}}
+              value={genre} onChange={e => setGenre(e.target.value)}>
+              {GENRES.map(g => <option key={g}>{g}</option>)}
+            </select>
+          </div>
+          <div>
+            <div style={{fontSize:'12px', color:'#888', marginBottom:'4px'}}>担当者</div>
+            <select style={{border:'1px solid #ddd', borderRadius:'8px', padding:'10px 14px', fontSize:'14px', background:'white', minWidth:'140px'}}
+              value={staff} onChange={e => setStaff(e.target.value)}>
+              {STAFF.map(s => <option key={s}>{s}</option>)}
+            </select>
+          </div>
+          <button onClick={handleSearch}
+            style={{background:'#1a1a1a', color:'white', border:'none', borderRadius:'8px', padding:'10px 24px', fontSize:'14px', cursor:'pointer', fontWeight:'500'}}>
+            検索
+          </button>
+        </div>
 
-      {loading && <p className="text-sm text-gray-500 mb-4">検索中...（10〜20秒かかります）</p>}
-      {!loading && searched && <p className="text-sm text-gray-500 mb-4">{stores.length}件</p>}
-      {!searched && <p className="text-sm text-gray-400 mb-4">エリアと職種を選んで検索してください</p>}
-
-      <div className="overflow-x-auto border rounded-lg">
-        <table className="w-full text-xs">
-          <thead className="bg-gray-50 text-gray-600">
-            <tr>
-              <th className="text-left px-3 py-2 whitespace-nowrap">会社名</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">担当者</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">コール時間</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">ステータス</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">電話番号</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">業界</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">職種</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">都道府県</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">市区町村</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">ウェブサイト</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">評価</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">口コミ数</th>
-              <th className="text-left px-3 py-2 whitespace-nowrap">取得日</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stores.map((s, i) => (
-              <tr key={i} className="border-t hover:bg-gray-50">
-                <td className="px-3 py-2 font-medium whitespace-nowrap">{s.会社名}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{s.担当者}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{s.コール時間設定}</td>
-                <td className="px-3 py-2">
-                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">{s.ステータス}</span>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">{s.電話番号 || '-'}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{s.業界}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{s.職種}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{s.都道府県}</td>
-                <td className="px-3 py-2">{s.市区町村}</td>
-                <td className="px-3 py-2">
-                  {s.ウェブサイトURL
-                    ? <a href={s.ウェブサイトURL} target="_blank" className="text-blue-500 underline text-xs">リンク</a>
-                    : '-'}
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">{s.google評価 ? `★${s.google評価}` : '-'}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{s.口コミ数 || '-'}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{s.取得日}</td>
-              </tr>
+        {/* 件数表示 */}
+        {searched && !loading && (
+          <div style={{display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'1rem', marginBottom:'1.5rem'}}>
+            {[
+              {label:'総件数', value: stores.length},
+              {label:'エリア', value: area},
+              {label:'担当者', value: staff},
+            ].map(({label, value}) => (
+              <div key={label} style={{background:'white', borderRadius:'12px', padding:'1rem 1.25rem', border:'1px solid #eee'}}>
+                <div style={{fontSize:'12px', color:'#888', marginBottom:'4px'}}>{label}</div>
+                <div style={{fontSize:'22px', fontWeight:'600', color:'#1a1a1a'}}>{value}</div>
+              </div>
             ))}
-            {!loading && searched && stores.length === 0 && (
-              <tr><td colSpan={13} className="text-center py-8 text-gray-400">データがありません</td></tr>
-            )}
-          </tbody>
-        </table>
+          </div>
+        )}
+
+        {loading && <p style={{color:'#888', fontSize:'14px', marginBottom:'1rem'}}>検索中...（20〜30秒かかります）</p>}
+        {!searched && <p style={{color:'#aaa', fontSize:'14px', marginBottom:'1rem'}}>エリアと職種を選んで検索してください</p>}
+
+        {/* テーブル */}
+        <div style={{background:'white', borderRadius:'12px', border:'1px solid #eee', overflow:'hidden'}}>
+          <div style={{overflowX:'auto'}}>
+            <table style={{width:'100%', borderCollapse:'collapse', fontSize:'13px'}}>
+              <thead>
+                <tr style={{background:'#f9f9f9', borderBottom:'1px solid #eee'}}>
+                  {['会社名','担当者','コール時間','ステータス','電話番号','業界','職種','都道府県','市区町村','ウェブサイト','評価','口コミ数','取得日'].map(h => (
+                    <th key={h} style={{textAlign:'left', padding:'12px 16px', color:'#666', fontWeight:'500', whiteSpace:'nowrap'}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {stores.map((s, i) => (
+                  <tr key={i} style={{borderBottom:'1px solid #f0f0f0'}}>
+                    <td style={{padding:'12px 16px', fontWeight:'500', whiteSpace:'nowrap'}}>{s.会社名}</td>
+                    <td style={{padding:'12px 16px', whiteSpace:'nowrap', color:'#555'}}>{s.担当者}</td>
+                    <td style={{padding:'12px 16px', whiteSpace:'nowrap', color:'#555'}}>{s.コール時間設定}</td>
+                    <td style={{padding:'12px 16px'}}>
+                      <span style={{background:'#e8f0fe', color:'#1a73e8', padding:'3px 10px', borderRadius:'20px', fontSize:'12px', fontWeight:'500'}}>{s.ステータス}</span>
+                    </td>
+                    <td style={{padding:'12px 16px', whiteSpace:'nowrap'}}>{s.電話番号 || '-'}</td>
+                    <td style={{padding:'12px 16px', whiteSpace:'nowrap', color:'#555'}}>{s.業界}</td>
+                    <td style={{padding:'12px 16px', whiteSpace:'nowrap'}}>
+                      <span style={{background:'#f0f0f0', color:'#444', padding:'3px 10px', borderRadius:'20px', fontSize:'12px'}}>{s.職種}</span>
+                    </td>
+                    <td style={{padding:'12px 16px', whiteSpace:'nowrap', color:'#555'}}>{s.都道府県}</td>
+                    <td style={{padding:'12px 16px', color:'#555'}}>{s.市区町村}</td>
+                    <td style={{padding:'12px 16px'}}>
+                      {s.ウェブサイトURL
+                        ? <a href={s.ウェブサイトURL} target="_blank" style={{color:'#1a73e8', textDecoration:'none', fontSize:'12px'}}>リンク</a>
+                        : <span style={{color:'#ccc'}}>-</span>}
+                    </td>
+                    <td style={{padding:'12px 16px', whiteSpace:'nowrap'}}>{s.google評価 ? `★${s.google評価}` : '-'}</td>
+                    <td style={{padding:'12px 16px', whiteSpace:'nowrap', color:'#555'}}>{s.口コミ数 || '-'}</td>
+                    <td style={{padding:'12px 16px', whiteSpace:'nowrap', color:'#aaa'}}>{s.取得日}</td>
+                  </tr>
+                ))}
+                {!loading && searched && stores.length === 0 && (
+                  <tr><td colSpan={13} style={{textAlign:'center', padding:'3rem', color:'#aaa'}}>データがありません</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
-    </main>
+    </div>
   )
 }
