@@ -1,3 +1,10 @@
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
+
 import { NextResponse } from 'next/server'
 
 const API_KEY = process.env.GOOGLE_PLACES_API_KEY
@@ -145,4 +152,24 @@ export async function GET(request) {
     }))
 
   return NextResponse.json(results)
+  // Supabaseに保存（place_idで重複チェック）
+if (results.length > 0) {
+  const rows = results.map(r => ({
+    会社名: r.会社名,
+    担当者: r.担当者,
+    コール時間設定: r.コール時間設定,
+    ステータス: r.ステータス,
+    電話番号: '',
+    業界: r.業界,
+    職種: r.職種,
+    地域: r.都道府県,
+    ウェブサイトURL: '',
+    住所: r.市区町村,
+    google評価: String(r.google評価),
+    口コミ数: String(r.口コミ数),
+    取得日: r.取得日,
+    place_id: r.place_id,
+  }))
+  await supabase.from('stores').upsert(rows, { onConflict: 'place_id', ignoreDuplicates: true })
+}
 }
