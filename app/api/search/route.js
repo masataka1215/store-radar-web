@@ -158,7 +158,7 @@ const results = (data.results || [])
       place_id: p.place_id,
     }))
 
-  return NextResponse.json(results)
+  
   // Supabaseに保存（place_idで重複チェック）
 if (results.length > 0) {
   const rows = results.map(r => ({
@@ -179,4 +179,6 @@ if (results.length > 0) {
   }))
   await supabase.from('stores').upsert(rows, { onConflict: 'place_id', ignoreDuplicates: true })
 }
+return NextResponse.json(results)
+
 }
