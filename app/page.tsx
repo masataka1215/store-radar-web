@@ -28,7 +28,7 @@ const GENRES = ['すべて','居酒屋','ラーメン','中華','イタリアン
 const STATUSES = ['すべて','新規','商談中','成約','失注','対象外']
 
 export default function Home() {
-  const [stores, setStores] = useState([])
+　　const [stores, setStores] = useState<any[]>([])
   const [area, setArea] = useState('すべて')
   const [genre, setGenre] = useState('すべて')
   const [status, setStatus] = useState('すべて')
