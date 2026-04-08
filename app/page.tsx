@@ -18,6 +18,8 @@ const AREAS = [
   '大津市','草津市',
 ]
 
+const STAFF = ['梁川 允孝', '長野 敏也', '有馬 時也', '井口 凌太']
+
 const GENRES = [
   'すべて',
   '和食','日本料理','寿司','海鮮・魚介','そば（蕎麦）','うなぎ','焼き鳥',
@@ -27,7 +29,11 @@ const GENRES = [
   '料理旅館','ビストロ','ハンバーグ','とんかつ','串揚げ','うどん',
   'しゃぶしゃぶ','沖縄料理','ハンバーガー','パスタ','ピザ','餃子','ホルモン',
   'カフェ','喫茶店','ケーキ','タピオカ','食堂','ビュッフェ・バイキング',
+
+  
 ]
+
+
 
 export default function Home() {
   const [stores, setStores] = useState<any[]>([])
@@ -35,7 +41,7 @@ export default function Home() {
   const [genre, setGenre] = useState('すべて')
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
-
+const [staff, setStaff] = useState('梁川 允孝')
   const handleSearch = async () => {
     if (area === 'すべて' || area.startsWith('---')) {
       alert('エリアを選択してください')
@@ -43,7 +49,7 @@ export default function Home() {
     }
     setLoading(true)
     setSearched(true)
-    const params = new URLSearchParams({ area, genre })
+    const params = new URLSearchParams({ area, genre, staff })
     const res = await fetch(`/api/search?${params}`)
     const data = await res.json()
     setStores(data)
@@ -69,7 +75,9 @@ export default function Home() {
         <select className="border rounded px-3 py-2 text-sm" value={genre} onChange={e => setGenre(e.target.value)}>
           {GENRES.map(g => <option key={g}>{g}</option>)}
         </select>
-
+        <select className="border rounded px-3 py-2 text-sm" value={staff} onChange={e => setStaff(e.target.value)}>
+          {STAFF.map(s => <option key={s}>{s}</option>)}
+        </select>
         <button onClick={handleSearch} className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
           検索
         </button>

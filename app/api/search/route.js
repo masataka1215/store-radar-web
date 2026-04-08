@@ -114,10 +114,13 @@ function parseAddress(address) {
   return { pref: '', city: address }
 }
 
+
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const area = searchParams.get('area')
   const genre = searchParams.get('genre')
+  const staff = searchParams.get('staff') || '梁川 允孝'
 
   const coords = AREA_COORDS[area]
   if (!coords) return NextResponse.json({ error: 'エリアを選択してください' }, { status: 400 })
@@ -139,10 +142,10 @@ console.log(`フィルター後: ${filtered.length}件にDetails APIを叩きま
 
 const results = await Promise.all(filtered.map(async (p) => {
     const details = await getDetails(p.place_id)
-    
+
     return {
       会社名: p.name,
-      担当者: '梁川 允孝',
+      担当者: staff,
       コール時間設定: '9~10時',
       ステータス: '新規',
       電話番号: details.phone,
