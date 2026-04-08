@@ -41,18 +41,26 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
 
-  const handleSearch = async () => {
+const handleSearch = async () => {
     if (area === 'すべて' || area.startsWith('---')) {
       alert('エリアを選択してください')
       return
     }
     setLoading(true)
-    setSearched(true)
-    const params = new URLSearchParams({ area, genre, staff })
-    const res = await fetch(`/api/search?${params}`)
-    const data = await res.json()
-    setStores(data)
-    setLoading(false)
+    setSearched(false)
+    setStores([])
+    try {
+      const params = new URLSearchParams({ area, genre, staff })
+      const res = await fetch(`/api/search?${params}`)
+      if (!res.ok) throw new Error('APIエラー')
+      const data = await res.json()
+      setStores(data)
+    } catch (e) {
+      alert('検索に失敗しました。もう一度試してください。')
+    } finally {
+      setLoading(false)
+      setSearched(true)
+    }
   }
 
   return (
@@ -112,10 +120,24 @@ export default function Home() {
             ))}
           </div>
         )}
-
-        {loading && <p style={{color:'#888', fontSize:'14px', marginBottom:'1rem'}}>検索中...（20〜30秒かかります）</p>}
-        {!searched && <p style={{color:'#aaa', fontSize:'14px', marginBottom:'1rem'}}>エリアと職種を選んで検索してください</p>}
-
+{loading && (
+  <div style={{textAlign:'center', padding:'2rem', color:'#888', fontSize:'14px'}}>
+    <div>🔍 検索中...</div>
+    <div style={{fontSize:'12px', marginTop:'4px'}}>（エリアによって10〜30秒かかります）</div>
+  </div>
+)}
+{!loading && searched && stores.length === 0 && (
+  <p style={{color:'#e53e3e', fontSize:'14px', marginBottom:'1rem'}}>
+    ⚠️ 該当する店舗が見つかりませんでした
+  </p>
+)}
+{!loading && searched && stores.length > 0 && (
+  <p style={{color:'#888', fontSize:'14px', marginBottom:'1rem'}}>{stores.length}件見つかりました</p>
+)}
+{!searched && !loading && (
+  <p style={{color:'#aaa', fontSize:'14px', marginBottom:'1rem'}}>エリアと職種を選んで検索してください</p>
+)}
+        
         {/* テーブル */}
         <div style={{background:'white', borderRadius:'12px', border:'1px solid #eee', overflow:'hidden'}}>
           <div style={{overflowX:'auto'}}>
