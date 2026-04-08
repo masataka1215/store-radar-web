@@ -140,25 +140,25 @@ const filtered = (data.results || [])
 
 console.log(`フィルター後: ${filtered.length}件にDetails APIを叩きます`)
 
-const results = await Promise.all(filtered.map(async (p) => {
-    const details = await getDetails(p.place_id)
 
+
+const results = filtered.map((p) => {
     return {
       会社名: p.name,
       担当者: staff,
       コール時間設定: '9~10時',
       ステータス: '新規',
-      電話番号: details.phone,
+      電話番号: '',
       業界: '飲食店',
       職種: classifyGenre(p.name),
-      都道府県: pref || coords.pref,
-      ウェブサイトURL: details.website,
-      市区町村: city,
+      都道府県: coords.pref,
+      ウェブサイトURL: '',
+      市区町村: p.vicinity || '',
       google評価: p.rating || '',
       口コミ数: p.user_ratings_total || '',
       取得日: today,
     }
-  }))
+  })
 
   return NextResponse.json(results)
 }
