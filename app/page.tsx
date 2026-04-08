@@ -55,9 +55,27 @@ const handleSearch = async () => {
       if (!res.ok) throw new Error('APIエラー')
       const data = await res.json()
       setStores(data)
+      setLoading(false)
+      setSearched(true)
+
+      // バックグラウンドで電話番号を1件ずつ取得
+      data.forEach(async (store: any, index: number) => {
+        if (!store.place_id) return
+        try {
+          const r = await fetch(`/api/search?place_id=${store.place_id}`)
+          const detail = await r.json()
+          setStores(prev => prev.map((s, i) =>
+            i === index
+              ? { ...s, 電話番号: detail.phone || '-', ウェブサイトURL: detail.website || '' }
+              : s
+          ))
+        } catch (e) {
+          setStores(prev => prev.map((s, i) => i === index ? { ...s, 電話番号: '-' } : s))
+        }
+      })
     } catch (e) {
-      alert('検索に失敗しました。もう一度試してください。')
-    } finally {
+    
+     alert('検索に失敗しました。もう一度試してください。')
       setLoading(false)
       setSearched(true)
     }

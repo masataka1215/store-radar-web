@@ -21,7 +21,6 @@ const GENRE_MAP = {
   '食堂': '食堂', 'ビュッフェ・バイキング': 'バイキング ビュッフェ',
 }
 
-// 職種の自動分類
 const GENRE_CLASSIFY = [
   { label: '居酒屋', keywords: ['居酒屋', '酒場', '炉端', '酒'] },
   { label: 'ラーメン', keywords: ['ラーメン', 'らーめん', '拉麺', '麺'] },
@@ -93,36 +92,27 @@ function isChain(name) {
   return false
 }
 
-async function getDetails(place_id) {
-  const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=formatted_phone_number,website,formatted_address&language=ja&key=${API_KEY}`
-  const res = await fetch(url)
-  const data = await res.json()
-  return {
-    phone: data.result?.formatted_phone_number || '',
-    website: data.result?.website || '',
-    address: data.result?.formatted_address || '',
-  }
-}
-
-function parseAddress(address) {
-  // 「日本、〒xxx-xxxx 大阪府大阪市北区〇〇」→ 都道府県と市区町村以降に分割
-  address = address.replace(/日本、?/, '').replace(/〒\d{3}-\d{4}\s*/, '').trim()
-  const prefMatch = address.match(/^(東京都|北海道|(?:大阪|京都)府|.+?県)(.+)$/)
-  if (prefMatch) {
-    return { pref: prefMatch[1], city: prefMatch[2] }
-  }
-  return { pref: '', city: address }
-}
-
-
+const AREA_COORDS_MAP = AREA_COORDS
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const area = searchParams.get('area')
   const genre = searchParams.get('genre')
   const staff = searchParams.get('staff') || '梁川 允孝'
+  const place_id = searchParams.get('place_id')
 
-  const coords = AREA_COORDS[area]
+  // 電話番号単体取得モード
+  if (place_id) {
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=formatted_phone_number,website&language=ja&key=${API_KEY}`
+    const res = await fetch(url)
+    const data = await res.json()
+    return NextResponse.json({
+      phone: data.result?.formatted_phone_number || '',
+      website: data.result?.website || '',
+    })
+  }
+
+  const coords = AREA_COORDS_MAP[area]
   if (!coords) return NextResponse.json({ error: 'エリアを選択してください' }, { status: 400 })
 
   const keyword = GENRE_MAP[genre] || '飲食店'
@@ -133,22 +123,16 @@ export async function GET(request) {
   const res = await fetch(searchUrl)
   const data = await res.json()
 
-const filtered = (data.results || [])
+  const results = (data.results || [])
     .filter(p => !isChain(p.name))
     .filter(p => (p.user_ratings_total ?? 999) <= 50)
     .slice(0, 20)
-
-console.log(`フィルター後: ${filtered.length}件にDetails APIを叩きます`)
-
-
-
-const results = filtered.map((p) => {
-    return {
+    .map(p => ({
       会社名: p.name,
       担当者: staff,
       コール時間設定: '9~10時',
       ステータス: '新規',
-      電話番号: '',
+      電話番号: '取得中...',
       業界: '飲食店',
       職種: classifyGenre(p.name),
       都道府県: coords.pref,
@@ -157,8 +141,8 @@ const results = filtered.map((p) => {
       google評価: p.rating || '',
       口コミ数: p.user_ratings_total || '',
       取得日: today,
-    }
-  })
+      place_id: p.place_id,
+    }))
 
   return NextResponse.json(results)
 }
