@@ -132,7 +132,7 @@ export async function GET(request) {
 
 const filtered = (data.results || [])
     .filter(p => !isChain(p.name))
-    .filter(p => !p.user_ratings_total || p.user_ratings_total <= 50)
+    .filter(p => (p.user_ratings_total ?? 999) <= 50)
     .slice(0, 20)
 
   const results = await Promise.all(filtered.map(async (p) => {
