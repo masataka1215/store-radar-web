@@ -23,21 +23,21 @@ const GENRE_MAP = {
 
 // 職種の自動分類
 const GENRE_CLASSIFY = [
-  { label: '居酒屋', keywords: ['居酒屋', '酒場', '炉端'] },
-  { label: 'ラーメン', keywords: ['ラーメン', 'らーめん', '拉麺'] },
-  { label: '中華', keywords: ['中華', '中国料理', '餃子', '麻婆'] },
-  { label: 'イタリアン', keywords: ['イタリアン', 'イタリア', 'ピザ', 'パスタ'] },
+  { label: '居酒屋', keywords: ['居酒屋', '酒場', '炉端', '酒'] },
+  { label: 'ラーメン', keywords: ['ラーメン', 'らーめん', '拉麺', '麺'] },
+  { label: '中華', keywords: ['中華', '中国料理', '餃子', '麻婆', '点心'] },
+  { label: 'イタリアン', keywords: ['イタリアン', 'イタリア', 'ピザ', 'パスタ', 'トラットリア'] },
   { label: 'フレンチ', keywords: ['フレンチ', 'フランス料理', 'ビストロ'] },
   { label: 'そば・うどん', keywords: ['そば', 'うどん', '蕎麦'] },
-  { label: '焼肉', keywords: ['焼肉', '焼き肉', 'ホルモン', '牛角'] },
-  { label: '和食', keywords: ['和食', '日本料理', '割烹', '懐石'] },
-  { label: '寿司', keywords: ['寿司', '鮨', 'すし'] },
-  { label: '多国籍料理', keywords: ['アジア', 'タイ', '韓国', 'インド', 'メキシコ'] },
+  { label: '焼肉', keywords: ['焼肉', '焼き肉', 'ホルモン', 'カルビ'] },
+  { label: '和食', keywords: ['和食', '日本料理', '割烹', '懐石', '定食'] },
+  { label: '寿司', keywords: ['寿司', '鮨', 'すし', '握り'] },
+  { label: '多国籍料理', keywords: ['アジア', 'タイ', '韓国', 'インド', 'メキシコ', 'エスニック'] },
   { label: 'カレー', keywords: ['カレー', 'curry'] },
-  { label: 'バー', keywords: ['バー', 'bar', 'BAR', 'ワイン'] },
-  { label: '鉄板焼', keywords: ['鉄板焼', '鉄板'] },
-  { label: 'スイーツ', keywords: ['スイーツ', 'ケーキ', 'パフェ'] },
-  { label: 'カフェ', keywords: ['カフェ', 'cafe', 'coffee', 'コーヒー'] },
+  { label: 'バー', keywords: ['バー', 'bar', 'BAR', 'ワイン', 'ダイニングバー'] },
+  { label: '鉄板焼', keywords: ['鉄板焼', '鉄板', 'お好み焼き', 'もんじゃ'] },
+  { label: 'スイーツ', keywords: ['スイーツ', 'ケーキ', 'パフェ', 'デザート'] },
+  { label: 'カフェ', keywords: ['カフェ', 'cafe', 'coffee', 'コーヒー', '喫茶'] },
   { label: 'パン屋', keywords: ['パン', 'ベーカリー', 'bakery'] },
 ]
 
@@ -47,7 +47,7 @@ function classifyGenre(name) {
       if (name.includes(kw)) return g.label
     }
   }
-  return '飲食店'
+  return '不明'
 }
 
 const AREA_COORDS = {
@@ -130,8 +130,9 @@ export async function GET(request) {
   const res = await fetch(searchUrl)
   const data = await res.json()
 
-  const filtered = (data.results || [])
+const filtered = (data.results || [])
     .filter(p => !isChain(p.name))
+    .filter(p => !p.user_ratings_total || p.user_ratings_total <= 50)
     .slice(0, 20)
 
   const results = await Promise.all(filtered.map(async (p) => {
